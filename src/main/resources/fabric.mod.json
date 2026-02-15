@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "burke-mc",
 	"version": "${version}",
-	"name": "burke-mc",
+	"name": "burke mc",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
 		"Caleb Burke"
@@ -13,10 +13,10 @@
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/burke-mc/icon.png",
-	"environment": "server",
+	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"burkemc.Burkemc"
+			"burkemc.BurkeMc"
 		]
 	},
 	"mixins": [
