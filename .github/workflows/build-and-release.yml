@@ -50,7 +50,7 @@ jobs:
           name: Release ${{ steps.generate_release_tag.outputs.next_release_tag }}
           body: |
             Automated release for commit ${{ steps.git_commit_hash.outputs.commit_hash }}
-            files: |
+          files: |
             build/libs/*.jar
           generate_release_notes: true
         env:
