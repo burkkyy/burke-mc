@@ -51,7 +51,7 @@ jobs:
           body: |
             Automated release for commit ${{ steps.git_commit_hash.outputs.commit_hash }}
           files: |
-            build/libs/*.jar
+            build/libs/!(*-sources).jar
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
