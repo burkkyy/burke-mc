@@ -5,7 +5,7 @@
 - [ ] totem of undying max usage of 3 times before dying
 - [ ] telekinesis (from skyblock)
 - [ ] mana system (from skyblock)
-- [ ] player titles (or nicknames example king, boss, etc)
+- [ ] player titles (or nicknames example king, boss, etc.)
 - [ ] player moral rank (title based on number of kills)
 - [ ] player classes (from WOW)
 - [ ] dragon armor (from skyblock)
