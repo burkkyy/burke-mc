@@ -3,7 +3,7 @@
 	"package": "burkemc.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"CraftingTableMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
