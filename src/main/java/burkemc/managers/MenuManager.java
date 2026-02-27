@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
@@ -21,12 +22,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 
+import java.util.ArrayList;
+
 public class MenuManager {
 
     public static final Item MENU_ITEM = Items.NETHER_STAR;
     public static final int MENU_ITEM_SLOT = 8;
 
-    public static void register(){
+    public static void register() {
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
             ensureMenuItem(newPlayer);
         });
@@ -76,39 +79,39 @@ public class MenuManager {
             }
             return ActionResult.PASS;
         });
-   }
+    }
 
-   private static ItemStack makeMenuButton(){
-       ItemStack menuStack = new ItemStack(MENU_ITEM);
+    private static ItemStack makeMenuButton() {
+        ItemStack menuStack = new ItemStack(MENU_ITEM);
 
-       // _TODO_: find better restricted items naming
-       var nbt = new NbtCompound();
-       nbt.putBoolean("isMenuItem", true);
-       menuStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+        // _TODO_: find better restricted items naming
+        var nbt = new NbtCompound();
+        nbt.putBoolean("isMenuItem", true);
+        menuStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
 
-       MutableText title = Text.literal("Menu ")
-               .styled(style -> style.withItalic(false).withColor(Formatting.WHITE));
-       MutableText subText = Text.literal("(Click to Open)")
-               .styled(style -> style.withColor(Formatting.GRAY).withItalic(false));
-       menuStack.set(DataComponentTypes.CUSTOM_NAME, title.append(subText));
+        MutableText title = Text.literal("Menu ")
+                .styled(style -> style.withItalic(false).withColor(Formatting.WHITE));
+        MutableText subText = Text.literal("(Click to Open)")
+                .styled(style -> style.withColor(Formatting.GRAY).withItalic(false));
+        menuStack.set(DataComponentTypes.CUSTOM_NAME, title.append(subText));
         return menuStack;
-   }
+    }
 
     public static boolean isMenuItem(ItemStack stack) {
-        if (!stack.isOf(MENU_ITEM)){
+        if (!stack.isOf(MENU_ITEM)) {
             return false;
         }
 
         NbtComponent data = stack.get(DataComponentTypes.CUSTOM_DATA);
 
-        if (data == null){
+        if (data == null) {
             return false;
         }
 
         return data.copyNbt().getBoolean("isMenuItem", false);
     }
 
-    private static ItemStack makeButton(Item icon, String label, String action) {
+    private static ItemStack makeNavigableSlot(Item icon, String label, String action) {
         ItemStack stack = new ItemStack(icon);
 
         NbtCompound nbt = new NbtCompound();
@@ -116,6 +119,19 @@ public class MenuManager {
 
         stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
         stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(label).styled(style -> style.withItalic(false)));
+        return stack;
+    }
+
+    // This needs refactoring
+    private static ItemStack makeInfoSlot(Item item, String name, String... lore){
+        ItemStack stack = new ItemStack(item);
+        stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(name).styled(s -> s.withItalic(false)));
+
+        if (lore.length > 0) {
+            var loreList = new ArrayList<Text>();
+            for (String line : lore) loreList.add(Text.literal(line).formatted(Formatting.GRAY));
+            stack.set(DataComponentTypes.LORE, new LoreComponent(loreList));
+        }
         return stack;
     }
 
@@ -136,8 +152,7 @@ public class MenuManager {
     public static void openMainMenu(ServerPlayerEntity player) {
         SimpleInventory inv = new SimpleInventory(54);
 
-        inv.setStack(20, makeButton(Items.COMPASS,     "§bSubmenu 1", "open_submenu_1"));
-        inv.setStack(24, makeButton(Items.ENDER_PEARL, "§dSubmenu 2", "open_submenu_2"));
+        inv.setStack(22, makeNavigableSlot(Items.COMPASS, "Coming Soon...", "open_submenu_1"));
 
         fillEmpty(inv);
 
