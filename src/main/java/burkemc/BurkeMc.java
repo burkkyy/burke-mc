@@ -1,14 +1,15 @@
 package burkemc;
 
-import com.mojang.authlib.GameProfile;
+import burkemc.managers.MenuManager;
 
 import net.fabricmc.api.ModInitializer;
-
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.BannedPlayerEntry;
 import net.minecraft.server.BannedPlayerList;
 import net.minecraft.text.Text;
+import net.minecraft.world.GameMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,11 @@ public class BurkeMc implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			ServerPlayerEntity player = handler.player;
+			player.changeGameMode(GameMode.SURVIVAL);
+		});
 
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayerEntity player) {
@@ -46,6 +52,8 @@ public class BurkeMc implements ModInitializer {
 				}
 			}
 		});
+
+		MenuManager.register();
 
 		LOGGER.info("Hello Fabric world!");
 	}

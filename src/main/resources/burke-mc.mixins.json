@@ -3,7 +3,10 @@
 	"package": "burkemc.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"CraftingTableMixin"
+		"CraftingTableMixin",
+		"PlayerEntityMixin",
+		"ScreenHandlerMixin",
+		"ServerPlayNetworkHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
