@@ -1,10 +1,14 @@
 package burkemc;
 
-import burkemc.managers.MenuManager;
+import burkemc.item.BurkeMcItems;
+import burkemc.menu.MenuManager;
 
+import burkemc.recipe.BurkeMcRecipeLoader;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.impl.resource.loader.ResourceManagerHelperImpl;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.BannedPlayerEntry;
 import net.minecraft.server.BannedPlayerList;
@@ -54,6 +58,9 @@ public class BurkeMc implements ModInitializer {
 		});
 
 		MenuManager.register();
+
+		ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
+		BurkeMcItems.initialize();
 
 		LOGGER.info("Hello Fabric world!");
 	}

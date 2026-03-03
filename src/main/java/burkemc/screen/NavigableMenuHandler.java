@@ -1,4 +1,4 @@
-package burkemc.gui;
+package burkemc.screen;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;

@@ -1,6 +1,6 @@
-package burkemc.managers;
+package burkemc.menu;
 
-import burkemc.gui.NavigableMenuHandler;
+import burkemc.screen.NavigableMenuHandler;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -30,13 +30,9 @@ public class MenuManager {
     public static final int MENU_ITEM_SLOT = 8;
 
     public static void register() {
-        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
-            ensureMenuItem(newPlayer);
-        });
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> ensureMenuItem(newPlayer));
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            ensureMenuItem(handler.player);
-        });
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ensureMenuItem(handler.player));
 
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             ItemStack stack = player.getStackInHand(hand);

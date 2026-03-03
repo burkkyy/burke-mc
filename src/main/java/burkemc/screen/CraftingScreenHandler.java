@@ -1,5 +1,7 @@
-package burkemc.gui;
+package burkemc.screen;
 
+import burkemc.recipe.BurkeMcRecipe;
+import burkemc.recipe.BurkeMcRecipeManager;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -19,6 +21,7 @@ import net.minecraft.text.Text;
 public class CraftingScreenHandler extends GenericContainerScreenHandler {
     private final SimpleInventory craftingInventory;
     private final ScreenHandlerContext context;
+    private BurkeMcRecipe activeBurkeMcRecipe = null;
 
     private static final int[] CRAFTING_SLOTS = {10, 11, 12, 19, 20, 21, 28, 29, 30};
     private static final int RESULT_SLOT = 23;
@@ -83,10 +86,11 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
         if (updatingResult || context == null) {
             return;
         }
+
         updatingResult = true;
 
-        this.context.run((world, pos) -> {
-            try {
+        try {
+            this.context.run((world, pos) -> {
                 if (world.isClient()) {
                     return;
                 }
@@ -97,18 +101,29 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
                         craftingInventory.getStack(CRAFTING_SLOTS[6]), craftingInventory.getStack(CRAFTING_SLOTS[7]), craftingInventory.getStack(CRAFTING_SLOTS[8])
                 ));
 
-                var match = world.getRecipeManager().getSynchronizedRecipes().getFirstMatch(RecipeType.CRAFTING, input, world);
+                var burkeMcMatch = BurkeMcRecipeManager.getFirstMatch(input);
 
-                if (match.isPresent()) {
-                    ItemStack result = match.get().value().craft(input, world.getRegistryManager());
+                if (burkeMcMatch.isPresent()) {
+                    activeBurkeMcRecipe = burkeMcMatch.get();
+                    var result = activeBurkeMcRecipe.result();
+                    craftingInventory.setStack(RESULT_SLOT, result);
+                    return;
+                }
+
+                activeBurkeMcRecipe = null;
+                var vanillaMatch = world.getRecipeManager().getSynchronizedRecipes().getFirstMatch(RecipeType.CRAFTING, input, world);
+
+                if (vanillaMatch.isPresent()) {
+                    ItemStack result = vanillaMatch.get().value().craft(input, world.getRegistryManager());
                     craftingInventory.setStack(RESULT_SLOT, result);
                 } else {
                     craftingInventory.setStack(RESULT_SLOT, ItemStack.EMPTY);
                 }
-            } finally {
-                updatingResult = false;
-            }
-        });
+
+            });
+        } finally {
+            updatingResult = false;
+        }
     }
 
     @Override
@@ -120,8 +135,9 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
     public ItemStack quickMove(PlayerEntity player, int slotIndex) {
         if (slotIndex == RESULT_SLOT) {
             Slot resultSlot = this.slots.get(RESULT_SLOT);
+            ItemStack currentResult = resultSlot.getStack();
 
-            while (true) {
+            while (ItemStack.areEqual(currentResult, resultSlot.getStack())) {
                 ItemStack result = resultSlot.getStack();
 
                 if (result.isEmpty() || result.getItem() == Items.BARRIER) {
@@ -135,7 +151,6 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
 
                 resultSlot.onTakeItem(player, result);
             }
-
 
             return ItemStack.EMPTY;
         }
@@ -275,16 +290,27 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
 
         @Override
         public void onTakeItem(PlayerEntity player, ItemStack stack) {
-            int[] gridSlots = {10, 11, 12, 19, 20, 21, 28, 29, 30};
-            for (int slot : gridSlots) {
-                ItemStack ingredient = craftingInventory.getStack(slot);
-                if (!ingredient.isEmpty()) {
-                    ingredient.decrement(1);
-                    craftingInventory.setStack(slot, ingredient.isEmpty() ? ItemStack.EMPTY : ingredient);
+            if (activeBurkeMcRecipe != null) {
+                var requiredIngredients = activeBurkeMcRecipe.ingredients();
+
+                for (int i = 0; i < 9; i++) {
+                    var requiredIngredient = requiredIngredients[i];
+                    var requiredIngredientCount = requiredIngredient.getCount();
+                    ItemStack ingredient = craftingInventory.getStack(CRAFTING_SLOTS[i]);
+                    ingredient.decrement(requiredIngredientCount);
+                    craftingInventory.setStack(CRAFTING_SLOTS[i], ingredient.isEmpty() ? ItemStack.EMPTY : ingredient);
+                }
+            } else {
+                for (int slot : CRAFTING_SLOTS) {
+                    ItemStack ingredient = craftingInventory.getStack(slot);
+                    if (!ingredient.isEmpty()) {
+                        ingredient.decrement(1);
+                        craftingInventory.setStack(slot, ingredient.isEmpty() ? ItemStack.EMPTY : ingredient);
+                    }
                 }
             }
 
-            craftingInventory.setStack(23, ItemStack.EMPTY);
+            craftingInventory.setStack(RESULT_SLOT, ItemStack.EMPTY);
             super.onTakeItem(player, stack);
         }
 

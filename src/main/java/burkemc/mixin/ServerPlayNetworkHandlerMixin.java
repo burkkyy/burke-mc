@@ -1,6 +1,6 @@
 package burkemc.mixin;
 
-import burkemc.managers.MenuManager;
+import burkemc.menu.MenuManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
