@@ -1,4 +1,4 @@
-package burkemc.gui;
+package burkemc.screen;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -39,7 +39,7 @@ public class NavigableMenuHandler extends GenericContainerScreenHandler {
 
         var x = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt().get("MenuAction");
 
-        System.out.println(x);
+//        System.out.println(x);
 
 //        switch (action) {
 //            case "open_submenu_1" -> {

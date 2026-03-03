@@ -1,6 +1,6 @@
 package burkemc.mixin;
 
-import burkemc.gui.CraftingScreenHandler;
+import burkemc.screen.CraftingScreenHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.entity.player.PlayerEntity;

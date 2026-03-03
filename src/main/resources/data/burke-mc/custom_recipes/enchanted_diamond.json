@@ -1,0 +1,16 @@
+{
+  "pattern": [
+    " D ",
+    "DDD",
+    " D "
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:diamond",
+      "count": 32
+    }
+  },
+  "result": {
+    "item": "burkemc:enchanted_diamond", "count": 1
+  }
+}
