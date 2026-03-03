@@ -20,48 +20,56 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 
 public class BurkeMc implements ModInitializer {
-	public static final String MOD_ID = "burke-mc";
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final String MOD_ID = "burke-mc";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	@Override
-	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+    @Override
+    public void onInitialize() {
+        // This code runs as soon as Minecraft is in a mod-load-ready state.
+        // However, some things (like resources) may still be uninitialized.
+        // Proceed with mild caution.
 
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			ServerPlayerEntity player = handler.player;
-			player.changeGameMode(GameMode.SURVIVAL);
-		});
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayerEntity player = handler.player;
+            server.execute(() -> {
+                if (player.getGameMode() == GameMode.SPECTATOR) {
+                    player.setHealth(player.getMaxHealth());
+                    player.changeGameMode(GameMode.SURVIVAL);
+                }
+            });
+        });
 
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity instanceof ServerPlayerEntity player) {
-				var server = player.getEntityWorld().getServer();
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+            if (entity instanceof ServerPlayerEntity player) {
+                var server = player.getEntityWorld().getServer();
 
-				if(server != null){
-					BannedPlayerList banList = server.getPlayerManager().getUserBanList();
+                if (server != null) {
+                    player.changeGameMode(GameMode.SPECTATOR);
+                    server.execute(() -> {
+                        BannedPlayerList banList = server.getPlayerManager().getUserBanList();
 
-					long banDurationMs = 2L * 24 * 60 * 60 * 1000;	// 2 days
-					Date expiryDate = new Date(System.currentTimeMillis() + banDurationMs);
-					String reason = "You died! Banned for 2 days.";
+                        long banDurationMs = 36 * 60 * 60 * 1000; // 36 hours
+                        Date expiryDate = new Date(System.currentTimeMillis() + banDurationMs);
+                        String reason = "You died! Banned for 2 days.";
 
-					var profile = player.getPlayerConfigEntry();
+                        var profile = player.getPlayerConfigEntry();
 
-					BannedPlayerEntry banEntry = new BannedPlayerEntry(profile, new Date(), "Death System", expiryDate, reason);
+                        BannedPlayerEntry banEntry = new BannedPlayerEntry(profile, new Date(), "Death System", expiryDate, reason);
 
-					banList.add(banEntry);
-					player.networkHandler.disconnect(Text.literal(reason));
+                        banList.add(banEntry);
+                        player.networkHandler.disconnect(Text.literal(reason));
 
-					LOGGER.info("Banned player {} for 2 days due to death.", player.getEntity());
-				}
-			}
-		});
+                        LOGGER.info("Banned player {} for 2 days due to death.", player.getEntity());
+                    });
+                }
+            }
+        });
 
-		MenuManager.register();
+        MenuManager.register();
 
-		ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
-		BurkeMcItems.initialize();
+        ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
+        BurkeMcItems.initialize();
 
-		LOGGER.info("Hello Fabric world!");
-	}
+        LOGGER.info("Hello Fabric world!");
+    }
 }
