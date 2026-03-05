@@ -11,18 +11,23 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class ScreenSlot extends Slot {
     private final SlotDefinition definition;
 
-    public ScreenSlot(SlotDefinition definition, Inventory inventory, int index){
-        super(inventory, index,8 + (index % 9) * 18, 18 + (index / 9) * 18);
+    public ScreenSlot(SlotDefinition definition, Inventory inventory, int index) {
+        super(inventory, index, 8 + (index % 9) * 18, 18 + (index / 9) * 18);
         this.definition = definition;
     }
 
-    public void onClick(ServerPlayerEntity player){}
+    public void onClick(ServerPlayerEntity player) {
+    }
 
     @Override
-    public boolean canInsert(ItemStack stack ) { return false; }
+    public boolean canInsert(ItemStack stack) {
+        return false;
+    }
 
     @Override
-    public boolean canTakeItems(PlayerEntity playerEntity) { return false; }
+    public boolean canTakeItems(PlayerEntity playerEntity) {
+        return false;
+    }
 
     @Override
     public ItemStack getStack() {
