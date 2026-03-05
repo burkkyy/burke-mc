@@ -1,8 +1,10 @@
 package burkemc;
 
+import burkemc.command.CommandRegistry;
 import burkemc.item.BurkeMcItems;
-import burkemc.menu.MenuManager;
 
+
+import burkemc.menu.MainMenuManager;
 import burkemc.recipe.BurkeMcRecipeLoader;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -65,7 +67,8 @@ public class BurkeMc implements ModInitializer {
             }
         });
 
-        MenuManager.register();
+        CommandRegistry.register();
+        MainMenuManager.register();
 
         ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
         BurkeMcItems.initialize();

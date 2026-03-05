@@ -1,6 +1,6 @@
 package burkemc.mixin;
 
-import burkemc.menu.MenuManager;
+import burkemc.menu.MainMenuManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -21,7 +21,7 @@ public class ScreenHandlerMixin {
         if (actionType == SlotActionType.THROW) {
             if (slotIndex >= 0 && slotIndex < handler.slots.size()) {
                 ItemStack stack = handler.slots.get(slotIndex).getStack();
-                if (MenuManager.isMenuItem(stack)) {
+                if (MainMenuManager.isMenuItem(stack)) {
                     ci.cancel();
                     handler.syncState();
                     return;
@@ -37,7 +37,7 @@ public class ScreenHandlerMixin {
 
             ItemStack stack = handler.getCursorStack();
 
-            if (MenuManager.isMenuItem(stack)) {
+            if (MainMenuManager.isMenuItem(stack)) {
                 ci.cancel();
                 handler.syncState();
                 return;
@@ -45,10 +45,9 @@ public class ScreenHandlerMixin {
 
             if (slotIndex >= 0 && slotIndex < handler.slots.size()) {
                 ItemStack stack2 = handler.slots.get(slotIndex).getStack();
-                if (MenuManager.isMenuItem(stack2)) {
+                if (MainMenuManager.isMenuItem(stack2)) {
                     ci.cancel();
                     handler.syncState();
-                    return;
                 }
             }
         }
