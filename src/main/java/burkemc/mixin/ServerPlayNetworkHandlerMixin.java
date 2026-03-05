@@ -1,6 +1,7 @@
 package burkemc.mixin;
 
-import burkemc.menu.MenuManager;
+import burkemc.menu.MainMenuHandler;
+import burkemc.menu.MainMenuManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -22,8 +23,8 @@ public class ServerPlayNetworkHandlerMixin {
 
     @Inject(method = "onHandSwing", at = @At("HEAD"))
     private void onHandSwing(HandSwingC2SPacket packet, CallbackInfo ci) {
-        if (MenuManager.isMenuItem(player.getStackInHand(packet.getHand()))) {
-            MenuManager.openMainMenu(player);
+        if (MainMenuManager.isMenuItem(player.getStackInHand(packet.getHand()))) {
+            MainMenuHandler.open(player);
         }
     }
 
@@ -33,7 +34,7 @@ public class ServerPlayNetworkHandlerMixin {
         if (packet.actionType() == SlotActionType.THROW) {
             int slotIndex = packet.slot();
             if (slotIndex >= 0 && slotIndex < player.currentScreenHandler.slots.size()) {
-                if (MenuManager.isMenuItem(player.currentScreenHandler.getSlot(slotIndex).getStack())) {
+                if (MainMenuManager.isMenuItem(player.currentScreenHandler.getSlot(slotIndex).getStack())) {
                     cancelAndSync(ci);
                     return;
                 }
@@ -44,14 +45,14 @@ public class ServerPlayNetworkHandlerMixin {
         if (packet.actionType() == SlotActionType.SWAP) {
             // Check the hotbar slot being swapped TO
             ItemStack hotbarStack = player.getInventory().getStack(packet.button());
-            if (MenuManager.isMenuItem(hotbarStack)) {
+            if (MainMenuManager.isMenuItem(hotbarStack)) {
                 cancelAndSync(ci);
                 return;
             }
             // Also check the slot being swapped FROM
             int slotIndex = packet.slot();
             if (slotIndex >= 0 && slotIndex < player.currentScreenHandler.slots.size()) {
-                if (MenuManager.isMenuItem(player.currentScreenHandler.getSlot(slotIndex).getStack())) {
+                if (MainMenuManager.isMenuItem(player.currentScreenHandler.getSlot(slotIndex).getStack())) {
                     cancelAndSync(ci);
                     return;
                 }
@@ -59,7 +60,7 @@ public class ServerPlayNetworkHandlerMixin {
         }
 
         // 2. Check cursor
-        if (MenuManager.isMenuItem(player.currentScreenHandler.getCursorStack())) {
+        if (MainMenuManager.isMenuItem(player.currentScreenHandler.getCursorStack())) {
             cancelAndSync(ci);
             return;
         }
@@ -67,7 +68,7 @@ public class ServerPlayNetworkHandlerMixin {
         // 3. Check clicked slot
         int slotIndex = packet.slot();
         if (slotIndex >= 0 && slotIndex < player.currentScreenHandler.slots.size()) {
-            if (MenuManager.isMenuItem(player.currentScreenHandler.getSlot(slotIndex).getStack())) {
+            if (MainMenuManager.isMenuItem(player.currentScreenHandler.getSlot(slotIndex).getStack())) {
                 cancelAndSync(ci);
             }
         }
@@ -81,9 +82,9 @@ public class ServerPlayNetworkHandlerMixin {
                 action == PlayerActionC2SPacket.Action.DROP_ALL_ITEMS) {
 
             ItemStack selected = player.getInventory().getStack(player.getInventory().getSelectedSlot());
-            if (MenuManager.isMenuItem(selected) ||
-                    MenuManager.isMenuItem(player.getMainHandStack()) ||
-                    MenuManager.isMenuItem(player.getOffHandStack())) {
+            if (MainMenuManager.isMenuItem(selected) ||
+                    MainMenuManager.isMenuItem(player.getMainHandStack()) ||
+                    MainMenuManager.isMenuItem(player.getOffHandStack())) {
 
                 ci.cancel();
                 player.currentScreenHandler.syncState();

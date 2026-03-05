@@ -1,6 +1,6 @@
 package burkemc.mixin;
 
-import burkemc.menu.MenuManager;
+import burkemc.menu.MainMenuManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,9 +15,9 @@ public class PlayerEntityMixin {
     private void onDropInventory(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity)(Object)this;
         if (player instanceof ServerPlayerEntity) {
-            ItemStack stack = player.getInventory().getStack(MenuManager.MENU_ITEM_SLOT);
-            if (stack.isOf(MenuManager.MENU_ITEM)) {
-                player.getInventory().setStack(MenuManager.MENU_ITEM_SLOT, ItemStack.EMPTY);
+            ItemStack stack = player.getInventory().getStack(MainMenuManager.MENU_ITEM_SLOT);
+            if (stack.isOf(MainMenuManager.MENU_ITEM)) {
+                player.getInventory().setStack(MainMenuManager.MENU_ITEM_SLOT, ItemStack.EMPTY);
             }
         }
     }
