@@ -1,6 +1,6 @@
 package burkemc.menu;
 
-import burkemc.IPlayerData;
+import burkemc.player.IPlayerData;
 import burkemc.screen.BaseMenuHandler;
 import burkemc.screen.ScreenSlot;
 import burkemc.screen.SlotDefinition;
@@ -38,7 +38,7 @@ public class SettingsMenuHandler extends BaseMenuHandler {
                 getInventory(), MENU_ITEM_SLOT_INDEX
         ));
 
-        var showMenuItem = IPlayerData.of(player).getBurkeMcSettings().showMenuItem;
+        var showMenuItem = IPlayerData.of(player).getSettings().showMenuItem;
 
         if (showMenuItem) {
             this.registerSlot(new ScreenSlot(
@@ -48,7 +48,7 @@ public class SettingsMenuHandler extends BaseMenuHandler {
                 @Override
                 public void onClick(ServerPlayerEntity player) {
                     var playerData = IPlayerData.of(player);
-                    playerData.getBurkeMcSettings().showMenuItem = false;
+                    playerData.getSettings().showMenuItem = false;
                     playerData.save();
                     MainMenuManager.ensureMenuItem(player);
                     SettingsMenuHandler.open(player);
@@ -62,7 +62,7 @@ public class SettingsMenuHandler extends BaseMenuHandler {
                 @Override
                 public void onClick(ServerPlayerEntity player) {
                     var playerData = IPlayerData.of(player);
-                    playerData.getBurkeMcSettings().showMenuItem = true;
+                    playerData.getSettings().showMenuItem = true;
                     playerData.save();
                     MainMenuManager.ensureMenuItem(player);
                     SettingsMenuHandler.open(player);

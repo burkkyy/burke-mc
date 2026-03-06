@@ -1,7 +1,8 @@
 package burkemc.mixin;
 
-import burkemc.IPlayerData;
-import burkemc.PlayerSettings;
+import burkemc.player.IPlayerData;
+import burkemc.player.PlayerSettings;
+import burkemc.player.PlayerWallet;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
@@ -14,7 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin implements IPlayerData {
     @Unique
-    private PlayerSettings burkeMcSettings = new PlayerSettings();
+    private PlayerSettings settings = new PlayerSettings();
+
+    @Unique
+    private PlayerWallet wallet = new PlayerWallet();
 
     @Override
     public void save(){
@@ -25,15 +29,20 @@ public abstract class ServerPlayerEntityMixin implements IPlayerData {
     }
 
     @Override
-    public PlayerSettings getBurkeMcSettings() { return burkeMcSettings; }
+    public PlayerSettings getSettings() { return settings; }
+
+    @Override
+    public PlayerWallet getWallet() { return wallet; }
 
     @Inject(method = "readCustomData", at = @At("RETURN"))
     private void readCustomData(ReadView view, CallbackInfo ci) {
-        this.burkeMcSettings = PlayerSettings.readFrom(view);
+        this.settings = PlayerSettings.readFrom(view);
+        this.wallet = PlayerWallet.readFrom(view);
     }
 
     @Inject(method = "writeCustomData", at = @At("RETURN"))
     private void writeCustomData(WriteView view, CallbackInfo ci) {
-        this.burkeMcSettings.writeTo(view);
+        this.settings.writeTo(view);
+        this.wallet.writeTo(view);
     }
 }
