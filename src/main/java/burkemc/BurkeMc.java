@@ -5,9 +5,12 @@ import burkemc.item.BurkeMcItems;
 
 
 import burkemc.menu.MainMenuManager;
+import burkemc.player.PlayerHud;
 import burkemc.recipe.BurkeMcRecipeLoader;
+import burkemc.util.TickScheduler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.impl.resource.loader.ResourceManagerHelperImpl;
 import net.minecraft.resource.ResourceType;
@@ -31,13 +34,21 @@ public class BurkeMc implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
+        TickScheduler.register();
+        CommandRegistry.register();
+        MainMenuManager.register();
+
+        ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
+        BurkeMcItems.initialize();
+
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
             server.execute(() -> {
                 if (player.getGameMode() == GameMode.SPECTATOR) {
-                    player.setHealth(player.getMaxHealth());
                     player.changeGameMode(GameMode.SURVIVAL);
                 }
+
+                PlayerHud.initialize(handler.player);
             });
         });
 
@@ -47,7 +58,8 @@ public class BurkeMc implements ModInitializer {
 
                 if (server != null) {
                     player.changeGameMode(GameMode.SPECTATOR);
-                    server.execute(() -> {
+
+                    TickScheduler.schedule(() -> {
                         BannedPlayerList banList = server.getPlayerManager().getUserBanList();
 
                         long banDurationMs = 36 * 60 * 60 * 1000; // 36 hours
@@ -62,17 +74,20 @@ public class BurkeMc implements ModInitializer {
                         player.networkHandler.disconnect(Text.literal(reason));
 
                         LOGGER.info("Banned player {} for 2 days due to death.", player.getEntity());
-                    });
+                    }, 20);
                 }
             }
         });
 
-        CommandRegistry.register();
-        MainMenuManager.register();
-
-        ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
-        BurkeMcItems.initialize();
-
-        LOGGER.info("Hello Fabric world!");
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+            if (!alive) {
+                TickScheduler.schedule(() -> newPlayer.sendMessage(Text.literal("Respawning in 5")), 20);
+                TickScheduler.schedule(() -> newPlayer.sendMessage(Text.literal("4")), 40);
+                TickScheduler.schedule(() -> newPlayer.sendMessage(Text.literal("3")), 60);
+                TickScheduler.schedule(() -> newPlayer.sendMessage(Text.literal("2")), 80);
+                TickScheduler.schedule(() -> newPlayer.sendMessage(Text.literal("1")), 100);
+                TickScheduler.schedule(() -> newPlayer.changeGameMode(GameMode.SURVIVAL), 120);
+            }
+        });
     }
 }

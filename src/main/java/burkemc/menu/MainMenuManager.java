@@ -1,6 +1,6 @@
 package burkemc.menu;
 
-import burkemc.IPlayerData;
+import burkemc.player.IPlayerData;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -101,7 +101,7 @@ public class MainMenuManager {
     }
 
     public static void ensureMenuItem(ServerPlayerEntity player) {
-        var settings = IPlayerData.of(player).getBurkeMcSettings();
+        var settings = IPlayerData.of(player).getSettings();
 
         var inv = player.getInventory();
 

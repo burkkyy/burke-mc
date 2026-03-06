@@ -1,4 +1,4 @@
-package burkemc;
+package burkemc.player;
 
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;

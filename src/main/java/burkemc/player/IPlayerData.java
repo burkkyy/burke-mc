@@ -1,9 +1,13 @@
-package burkemc;
+package burkemc.player;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 
+/**
+ * Any changes should be reflected in src/main/java/burkemc/mixin/ServerPlayerEntityMixin.java
+ */
 public interface IPlayerData {
-    PlayerSettings getBurkeMcSettings();
+    PlayerWallet getWallet();
+    PlayerSettings getSettings();
 
     void save();
 
