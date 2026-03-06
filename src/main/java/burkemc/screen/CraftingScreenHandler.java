@@ -1,5 +1,6 @@
 package burkemc.screen;
 
+import burkemc.menu.MainMenuManager;
 import burkemc.recipe.BurkeMcRecipe;
 import burkemc.recipe.BurkeMcRecipeManager;
 import net.minecraft.component.DataComponentTypes;
@@ -7,8 +8,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -18,7 +22,15 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+// _TODO_ refactor this class, current its doing too much and looks ugly
 public class CraftingScreenHandler extends GenericContainerScreenHandler {
+    private final PlayerInventory playerInventory;
+    private int lastInventoryHash = -1;
+
     private final SimpleInventory craftingInventory;
     private final ScreenHandlerContext context;
     private BurkeMcRecipe activeBurkeMcRecipe = null;
@@ -32,9 +44,18 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
     private static final int PLAYER_INV_START = 54;
     private static final int PLAYER_INV_END = 81;
 
+    private static final CraftingRecipeInput DUMMY_INPUT = CraftingRecipeInput.create(3, 3,
+            java.util.List.of(
+                    ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                    ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                    ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY
+            )
+    );
+
     public CraftingScreenHandler(int syncId, PlayerInventory playerInv, ScreenHandlerContext context) {
         super(ScreenHandlerType.GENERIC_9X6, syncId, playerInv, new SimpleInventory(54), 6);
         this.context = context;
+        this.playerInventory = playerInv;
         this.craftingInventory = (SimpleInventory) this.getInventory();
 
         this.craftingInventory.addListener(this::onContentChanged);
@@ -72,12 +93,15 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInv, col, 8 + col * 18, 198));
         }
+
+        updateQuickCraftSlots();
     }
 
     @Override
     public void onContentChanged(Inventory inventory) {
         super.onContentChanged(inventory);
         updateResult();
+        updateQuickCraftSlots();
     }
 
     private boolean updatingResult = false;
@@ -124,6 +148,151 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
         } finally {
             updatingResult = false;
         }
+    }
+
+    private void updateQuickCraftSlots() {
+        int currentHash = computeInventoryHash();
+        if (currentHash == lastInventoryHash) return;
+        lastInventoryHash = currentHash;
+
+        context.run((world, pos) -> {
+            if (world.isClient()) return;
+
+            Map<Item, Integer> available = new HashMap<>();
+            for (int i = 0; i < playerInventory.size(); i++) {
+                ItemStack stack = playerInventory.getStack(i);
+                if (stack.isEmpty() || MainMenuManager.isMenuItem(stack)) {
+                    continue;
+                }
+                available.merge(stack.getItem(), stack.getCount(), Integer::sum);
+            }
+
+            List<ItemStack> craftable = world.getRecipeManager()
+                    .getSynchronizedRecipes().getAllOfType(RecipeType.CRAFTING)
+                    .stream()
+                    .filter(craftingRecipeRecipeEntry -> canCraftFromInventory(craftingRecipeRecipeEntry.value(), available))
+                    .map(entry -> {
+                        try {
+                            return entry.value().craft(DUMMY_INPUT, world.getRegistryManager());
+                        } catch (Exception e) {
+                            return ItemStack.EMPTY;
+                        }
+                    })
+                    .filter(stack -> !stack.isEmpty())
+                    .limit(3)
+                    .toList();
+
+            for (int i = 0; i < QUICK_CRAFT_SLOT.length; i++) {
+                if (i < craftable.size()) {
+                    craftingInventory.setStack(QUICK_CRAFT_SLOT[i], craftable.get(i));
+                } else {
+                    craftingInventory.setStack(QUICK_CRAFT_SLOT[i], ItemStack.EMPTY);
+                }
+            }
+        });
+    }
+
+    private boolean canCraftFromInventory(CraftingRecipe recipe, Map<Item, Integer> available) {
+        var ingredients = recipe.getIngredientPlacement().getIngredients();
+
+        // Skip recipes with no real ingredients
+        if (ingredients.isEmpty() || ingredients.stream().allMatch(Ingredient::isEmpty)) {
+            return false;
+        }
+
+        Map<Item, Integer> remaining = new HashMap<>(available);
+
+        for (Ingredient ingredient : recipe.getIngredientPlacement().getIngredients()) {
+            if (ingredient.isEmpty()) continue;
+
+            boolean found = false;
+            for (Map.Entry<Item, Integer> entry : remaining.entrySet()) {
+                if (ingredient.test(new ItemStack(entry.getKey())) && entry.getValue() > 0) {
+                    remaining.merge(entry.getKey(), -1, Integer::sum);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) return false;
+        }
+
+        return true;
+    }
+
+    private int computeInventoryHash() {
+        int hash = 0;
+        for (int i = 0; i < playerInventory.size(); i++) {
+            ItemStack stack = playerInventory.getStack(i);
+            hash = 31 * hash + stack.getItem().hashCode();
+            hash = 31 * hash + stack.getCount();
+        }
+        return hash;
+    }
+
+    private void quickCraft(PlayerEntity player, ItemStack desired, int repeatTimes) {
+        if (desired.isEmpty()) return;
+
+        context.run((world, pos) -> {
+            if (world.isClient()) return;
+
+            var match = world.getRecipeManager()
+                    .getSynchronizedRecipes()
+                    .getAllOfType(RecipeType.CRAFTING)
+                    .stream()
+                    .filter(entry -> {
+                        try {
+                            return ItemStack.areItemsEqual(
+                                    entry.value().craft(DUMMY_INPUT, world.getRegistryManager()), desired);
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    })
+                    .findFirst();
+
+            if (match.isEmpty()) return;
+
+
+            for (int t = 0; t < repeatTimes; t++) {
+                var ingredients = match.get().value().getIngredientPlacement().getIngredients();
+                Map<Integer, Integer> toConsume = new HashMap<>();
+
+                for (Ingredient ingredient : ingredients) {
+                    if (ingredient.isEmpty()) continue;
+
+                    boolean found = false;
+
+                    for (int j = 0; j < playerInventory.size(); j++) {
+                        ItemStack invStack = playerInventory.getStack(j);
+                        if (invStack.isEmpty()) continue;
+                        if (!ingredient.test(invStack)) continue;
+
+                        int alreadyTaking = toConsume.getOrDefault(j, 0);
+                        int available = invStack.getCount() - alreadyTaking;
+
+                        if (available > 0) {
+                            toConsume.merge(j, 1, Integer::sum);
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        updateQuickCraftSlots();
+                        return;
+                    }
+                }
+
+                for (Map.Entry<Integer, Integer> entry : toConsume.entrySet()) {
+                    playerInventory.getStack(entry.getKey()).decrement(entry.getValue());
+                }
+
+                var result = match.get().value().craft(DUMMY_INPUT, world.getRegistryManager());
+                player.getInventory().offerOrDrop(result);
+            }
+
+            updateQuickCraftSlots();
+        });
     }
 
     @Override
@@ -188,6 +357,16 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
             }
 
             if (this.slots.get(slotIndex) instanceof FillerSlot || this.slots.get(slotIndex) instanceof BottomRowFillerSlot) {
+                return;
+            }
+
+            if (this.slots.get(slotIndex) instanceof QuickCraftSlot) {
+                ItemStack result = craftingInventory.getStack(QUICK_CRAFT_SLOT[slotIndex == QUICK_CRAFT_SLOT[0] ? 0 : slotIndex == QUICK_CRAFT_SLOT[1] ? 1 : 2]);
+                if (actionType == net.minecraft.screen.slot.SlotActionType.QUICK_MOVE) {
+                    quickCraft(player, result, 64);
+                } else {
+                    quickCraft(player, result, 1);
+                }
                 return;
             }
         }
