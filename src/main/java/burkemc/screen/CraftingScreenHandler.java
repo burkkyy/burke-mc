@@ -11,9 +11,7 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.*;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
@@ -170,6 +168,7 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
             List<ItemStack> craftable = world.getRecipeManager()
                     .getSynchronizedRecipes().getAllOfType(RecipeType.CRAFTING)
                     .stream()
+                    .filter(entry -> entry.value() instanceof ShapedRecipe || entry.value() instanceof ShapelessRecipe)
                     .filter(craftingRecipeRecipeEntry -> canCraftFromInventory(craftingRecipeRecipeEntry.value(), available))
                     .map(entry -> {
                         try {
@@ -240,6 +239,7 @@ public class CraftingScreenHandler extends GenericContainerScreenHandler {
                     .getSynchronizedRecipes()
                     .getAllOfType(RecipeType.CRAFTING)
                     .stream()
+                    .filter(entry -> entry.value() instanceof ShapedRecipe || entry.value() instanceof ShapelessRecipe)
                     .filter(entry -> {
                         try {
                             return ItemStack.areItemsEqual(
