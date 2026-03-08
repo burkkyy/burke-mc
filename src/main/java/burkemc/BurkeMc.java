@@ -1,13 +1,14 @@
 package burkemc;
 
+import burkemc.block.BurkeMcBlocks;
 import burkemc.command.CommandRegistry;
 import burkemc.item.BurkeMcItems;
-
 
 import burkemc.menu.MainMenuManager;
 import burkemc.player.PlayerHud;
 import burkemc.recipe.BurkeMcRecipeLoader;
 import burkemc.util.TickScheduler;
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 
 public class BurkeMc implements ModInitializer {
-    public static final String MOD_ID = "burke-mc";
+    public static final String MOD_ID = "burkemc";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
@@ -38,8 +39,13 @@ public class BurkeMc implements ModInitializer {
         CommandRegistry.register();
         MainMenuManager.register();
 
+        // Order here matters
         ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
         BurkeMcItems.initialize();
+        BurkeMcBlocks.initialize();
+
+        var result = PolymerResourcePackUtils.addModAssets(MOD_ID);
+        LOGGER.info("PolymerResourcePackUtils.addModAssets={}", result);
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;

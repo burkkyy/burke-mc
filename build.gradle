@@ -25,7 +25,7 @@ loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"burke-mc" {
+		"burkemc" {
 			sourceSet sourceSets.main
 		}
 	}
@@ -43,6 +43,8 @@ dependencies {
 
 	// https://polymer.pb4.eu/latest/polymer-core/getting-started/
 	modImplementation include("eu.pb4:polymer-core:0.15.2+1.21.11")
+	modImplementation include("eu.pb4:polymer-blocks:0.15.2+1.21.11")
+	modImplementation include("eu.pb4:polymer-resource-pack:0.15.2+1.21.11")
 }
 
 processResources {
