@@ -1,5 +1,6 @@
-package burkemc.menu;
+package burkemc.menu.manager;
 
+import burkemc.menu.MainMenu;
 import burkemc.player.IPlayerData;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
@@ -41,7 +42,7 @@ public class MainMenuManager {
 
             if (isMenuItem(stack)) {
                 if (!world.isClient()) {
-                    MainMenuHandler.open((ServerPlayerEntity) player);
+                    MainMenu.open((ServerPlayerEntity) player);
                     return ActionResult.SUCCESS;
                 }
             }
@@ -53,7 +54,7 @@ public class MainMenuManager {
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
             ItemStack stack = player.getStackInHand(hand);
             if (!world.isClient() && isMenuItem(stack)) {
-                MainMenuHandler.open((ServerPlayerEntity) player);
+                MainMenu.open((ServerPlayerEntity) player);
                 return ActionResult.FAIL;
             }
             return ActionResult.PASS;
@@ -63,7 +64,7 @@ public class MainMenuManager {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             ItemStack stack = player.getStackInHand(hand);
             if (!world.isClient() && isMenuItem(stack)) {
-                MainMenuHandler.open((ServerPlayerEntity) player);
+                MainMenu.open((ServerPlayerEntity) player);
                 return ActionResult.FAIL;
             }
             return ActionResult.PASS;

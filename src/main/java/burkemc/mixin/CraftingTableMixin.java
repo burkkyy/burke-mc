@@ -1,13 +1,11 @@
 package burkemc.mixin;
 
-import burkemc.screen.CraftingScreenHandler;
+import burkemc.menu.CraftingMenu;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
-import net.minecraft.text.Text;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -22,14 +20,13 @@ public class CraftingTableMixin {
     @Inject(at = @At("HEAD"), method = "onUse", cancellable = true)
     private void onUse(BlockState state, World world, BlockPos pos, PlayerEntity player,
                        BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
-        if (!world.isClient()) {
-            NamedScreenHandlerFactory factory = new SimpleNamedScreenHandlerFactory(
-                    (syncId, playerInv, p) ->
-                            new CraftingScreenHandler(syncId, playerInv, ScreenHandlerContext.create(world, pos)),
-                    Text.literal("Craft Item")
-            );
-            player.openHandledScreen(factory);
+        if (world.isClient()) {
+            return;
         }
-        cir.setReturnValue(ActionResult.SUCCESS);
+
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+            CraftingMenu.open(serverPlayer, ScreenHandlerContext.create(world, pos));
+            cir.setReturnValue(ActionResult.CONSUME);
+        }
     }
 }

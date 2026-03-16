@@ -3,7 +3,7 @@ package burkemc.recipe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 
-public record BurkeMcRecipe(ItemStack[] ingredients, ItemStack result) {
+public record ModRecipe(ItemStack[] ingredients, ItemStack result) {
 
     public boolean matches(CraftingRecipeInput grid) {
         if (grid.getWidth() != 3 || grid.getHeight() != 3) {

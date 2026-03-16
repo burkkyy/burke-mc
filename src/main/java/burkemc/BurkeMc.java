@@ -1,12 +1,12 @@
 package burkemc;
 
-import burkemc.block.BurkeMcBlocks;
+import burkemc.block.ModBlocks;
 import burkemc.command.CommandRegistry;
-import burkemc.item.BurkeMcItems;
+import burkemc.item.ModItems;
 
-import burkemc.menu.MainMenuManager;
+import burkemc.menu.manager.MainMenuManager;
 import burkemc.player.PlayerHud;
-import burkemc.recipe.BurkeMcRecipeLoader;
+import burkemc.recipe.ModRecipeLoader;
 import burkemc.util.TickScheduler;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.impl.resource.loader.ResourceManagerHelperImpl;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.BannedPlayerEntry;
@@ -40,12 +41,13 @@ public class BurkeMc implements ModInitializer {
         MainMenuManager.register();
 
         // Order here matters
-        ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new BurkeMcRecipeLoader());
-        BurkeMcItems.initialize();
-        BurkeMcBlocks.initialize();
+        ResourceManagerHelperImpl.get(ResourceType.SERVER_DATA).registerReloadListener(new ModRecipeLoader());
+        ModItems.initialize();
+        ModBlocks.initialize();
 
         var result = PolymerResourcePackUtils.addModAssets(MOD_ID);
         LOGGER.info("PolymerResourcePackUtils.addModAssets={}", result);
+        // PolymerResourcePackUtils.markAsRequired();
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
@@ -95,5 +97,9 @@ public class BurkeMc implements ModInitializer {
                 TickScheduler.schedule(() -> newPlayer.changeGameMode(GameMode.SURVIVAL), 120);
             }
         });
+    }
+
+    public static boolean isModItem(ItemStack stack){
+        return stack.getCreatorNamespace().equals(MOD_ID);
     }
 }

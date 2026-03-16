@@ -1,10 +1,11 @@
 package burkemc.block;
 
+import burkemc.BurkeMc;
 import burkemc.block.misc.BankTellerWorkstation;
 import burkemc.block.misc.BankTellerWorkstationItem;
 import burkemc.block.misc.ExampleBlock;
 import burkemc.block.misc.ExampleBlockItem;
-import burkemc.item.BurkeMcItems;
+import burkemc.item.ModItems;
 import eu.pb4.polymer.blocks.api.BlockModelType;
 import eu.pb4.polymer.blocks.api.PolymerBlockModel;
 import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
@@ -27,7 +28,7 @@ import java.util.function.BiFunction;
 
 import static burkemc.BurkeMc.MOD_ID;
 
-public class BurkeMcBlocks {
+public class ModBlocks {
     private static final Map<String, Block> BLOCKS = new LinkedHashMap<>();
 
     // _TODO_ replace this with a builder pattern? YES ASAP
@@ -49,7 +50,7 @@ public class BurkeMcBlocks {
 
         BlockItem item = itemFactory.apply(block, new Item.Settings().registryKey(itemKey));
         Registry.register(Registries.ITEM, itemKey, item);
-        BurkeMcItems.track(path, item);
+        ModItems.track(path, item);
 
         BLOCKS.put(path, block);
         return block;
@@ -83,12 +84,13 @@ public class BurkeMcBlocks {
 
         BlockItem item = itemFactory.apply(block, new Item.Settings().registryKey(itemKey));
         Registry.register(Registries.ITEM, itemKey, item);
-        BurkeMcItems.track(path, item);
+        ModItems.track(path, item);
 
         BLOCKS.put(path, block);
         return block;
     }
 
-
-    public static void initialize() {  }
+    public static void initialize() {
+        BurkeMc.LOGGER.info("Initializing ModBlocks");
+    }
 }
