@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "burke-mc",
+	"id": "burkemc",
 	"version": "${version}",
-	"name": "burke mc",
+	"name": "burkemc",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
 		"Caleb Burke"
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/burke-mc/icon.png",
+	"icon": "assets/burkemc/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -20,7 +20,7 @@
 		]
 	},
 	"mixins": [
-		"burke-mc.mixins.json"
+		"burkemc.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.18.4",
