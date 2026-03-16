@@ -47,6 +47,7 @@ public class BurkeMc implements ModInitializer {
 
         var result = PolymerResourcePackUtils.addModAssets(MOD_ID);
         LOGGER.info("PolymerResourcePackUtils.addModAssets={}", result);
+        // PolymerResourcePackUtils.markAsRequired();
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
