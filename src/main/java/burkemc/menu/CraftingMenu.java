@@ -361,7 +361,7 @@ public class CraftingMenu extends BaseMenuHandler {
                 return;
             }
 
-            ItemStack desired = getVanillaCraftingRecipeResult(recipe);
+            ItemStack desired = getVanillaCraftingRecipeResult(recipe, world.getRegistryManager());
 
             if (desired.isEmpty()) {
                 System.out.println("Player trying to make an invalid recipe?\n\trecipe: " + recipe + " found ItemStack: " + desired);
