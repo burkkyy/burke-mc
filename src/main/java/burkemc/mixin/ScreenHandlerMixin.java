@@ -1,6 +1,6 @@
 package burkemc.mixin;
 
-import burkemc.menu.MainMenuManager;
+import burkemc.menu.manager.MainMenuManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;

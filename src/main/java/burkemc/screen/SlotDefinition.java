@@ -16,4 +16,11 @@ public record SlotDefinition(
                 .toList();
         return new SlotDefinition(item, title, loreTexts);
     }
+
+    public static SlotDefinition of(ItemConvertible item, Text name, String... loreLines) {
+        List<Text> loreTexts = java.util.Arrays.stream(loreLines)
+                .map(line -> (Text) Text.literal(line).styled(s -> s.withColor(0xAAAAAA).withItalic(false)))
+                .toList();
+        return new SlotDefinition(item, name, loreTexts);
+    }
 }

@@ -16,10 +16,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BurkeMcRecipeLoader implements SimpleSynchronousResourceReloadListener {
+public class ModRecipeLoader implements SimpleSynchronousResourceReloadListener {
     public static final String RECIPES_PACKAGE = "custom_recipes";
 
-    public static final List<BurkeMcRecipe> RECIPES = new ArrayList<>();
+    public static final List<ModRecipe> RECIPES = new ArrayList<>();
 
     @Override
     public @NonNull Identifier getFabricId(){
@@ -81,7 +81,7 @@ public class BurkeMcRecipeLoader implements SimpleSynchronousResourceReloadListe
                     }
                 }
 
-                RECIPES.add(new BurkeMcRecipe(ingredients, resultStack));
+                RECIPES.add(new ModRecipe(ingredients, resultStack));
             } catch (Exception error){
                 System.err.println("Failed to load custom recipe: " + id);
                 error.printStackTrace();

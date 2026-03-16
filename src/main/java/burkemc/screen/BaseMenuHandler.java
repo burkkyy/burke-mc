@@ -17,12 +17,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BaseMenuHandler extends GenericContainerScreenHandler {
-    private static final int PLAYER_INV_START = 54;
-    private static final int PLAYER_INV_END = 81;
+    public static final int PLAYER_INV_START = 54;
+    public static final int PLAYER_INV_END = 81;
 
     protected final ServerPlayerEntity player;
     private static final int MAX_SLOTS = 54; // 9x6
     private final Map<Integer, ScreenSlot> registeredSlots = new HashMap<>();
+
+    protected boolean allowInventoryInteraction = false;
 
     protected BaseMenuHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, ServerPlayerEntity player) {
         super(ScreenHandlerType.GENERIC_9X6, syncId, playerInventory, inventory, 6);
@@ -31,15 +33,18 @@ public class BaseMenuHandler extends GenericContainerScreenHandler {
         build();
     }
 
-    protected void initialize(){}
+    protected void initialize() {
+    }
 
     protected void build() {
         for (int i = 0; i < MAX_SLOTS; i++) {
             int x = 8 + (i % 9) * 18;
             int y = 18 + (i / 9) * 18;
-            this.slots.set(i, registeredSlots.containsKey(i)
+            Slot newSlot = registeredSlots.containsKey(i)
                     ? registeredSlots.get(i)
-                    : new FillerSlot(getInventory(), i, x, y));
+                    : new FillerSlot(getInventory(), i, x, y);
+            newSlot.id = i;
+            this.slots.set(i, newSlot);
         }
     }
 
@@ -60,20 +65,55 @@ public class BaseMenuHandler extends GenericContainerScreenHandler {
 
     @Override
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
-        if (slotIndex >= 0 && slotIndex < 54) {
+        if (slotIndex >= 0 && slotIndex < this.slots.size()) {
             Slot slot = getSlot(slotIndex);
+
+            if (slot instanceof FillerSlot) {
+                return;
+            }
+
             if (slot instanceof ScreenSlot screenSlot) {
-                screenSlot.onClick(this.player);
+                if (screenSlot.hasDefinition()) {
+                    if (actionType == SlotActionType.QUICK_MOVE) {
+                        screenSlot.quickMove(player, slotIndex);
+                    } else {
+                        screenSlot.onClick(this.player);
+                    }
+                    return;
+                }
             }
         }
+
+        if (!allowInventoryInteraction) {
+            return;
+        }
+        super.onSlotClick(slotIndex, button, actionType, player);
     }
 
     @Override
     public ItemStack quickMove(PlayerEntity player, int index) {
-        return ItemStack.EMPTY;
+        if (index >= 0 && index < this.slots.size()) {
+            Slot slot = getSlot(index);
+
+            if (slot instanceof FillerSlot) {
+                return ItemStack.EMPTY;
+            }
+
+            if (slot instanceof ScreenSlot screenSlot) {
+                if (screenSlot.hasDefinition()) {
+                    return screenSlot.quickMove(player, index);
+                }
+            }
+        }
+
+        if (!allowInventoryInteraction) {
+            return ItemStack.EMPTY;
+        }
+
+        return super.quickMove(player, index);
     }
 
-    private static class FillerSlot extends Slot {
+    public static class FillerSlot extends Slot {
         public FillerSlot(Inventory inventory, int index, int x, int y) {
             super(inventory, index, x, y);
         }

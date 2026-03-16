@@ -1,7 +1,7 @@
 package burkemc.mixin;
 
-import burkemc.menu.MainMenuHandler;
-import burkemc.menu.MainMenuManager;
+import burkemc.menu.MainMenu;
+import burkemc.menu.manager.MainMenuManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -24,7 +24,7 @@ public class ServerPlayNetworkHandlerMixin {
     @Inject(method = "onHandSwing", at = @At("HEAD"))
     private void onHandSwing(HandSwingC2SPacket packet, CallbackInfo ci) {
         if (MainMenuManager.isMenuItem(player.getStackInHand(packet.getHand()))) {
-            MainMenuHandler.open(player);
+            MainMenu.open(player);
         }
     }
 

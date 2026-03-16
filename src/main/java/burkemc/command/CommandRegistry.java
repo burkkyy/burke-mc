@@ -1,6 +1,6 @@
 package burkemc.command;
 
-import burkemc.menu.MainMenuHandler;
+import burkemc.menu.MainMenu;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
@@ -18,7 +18,7 @@ public class CommandRegistry {
     private static int openMenu(CommandContext<ServerCommandSource> ctx) {
         ServerPlayerEntity player = ctx.getSource().getPlayer();
         if (player == null) return 0;
-        MainMenuHandler.open(player);
+        MainMenu.open(player);
         return 1;
     }
 }
